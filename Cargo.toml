@@ -6,6 +6,7 @@ description = """
 Combining https://github.com/bddap/tinyrender lesson 9 with https://www.youtube.com/watch?v=0Kx4Y9TVMGg
 Wgpu render using https://github.com/RayMarch/shame/tree/main/examples/simple_wgpu as a template.
 """
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
