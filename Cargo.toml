@@ -1,0 +1,27 @@
+[package]
+name = "bddatoms"
+version = "0.1.0"
+edition = "2021"
+description = """
+Combining https://github.com/bddap/tinyrender lesson 9 with https://www.youtube.com/watch?v=0Kx4Y9TVMGg
+Wgpu render using https://github.com/RayMarch/shame/tree/main/examples/simple_wgpu as a template.
+"""
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bytemuck = { version = "1.9.1", features = ["derive"] }
+wgpu = { version = "0.12.0", features = ["glsl"]}
+naga = "0.8"
+winit = "0.26.1"
+async-executor = "1.0"
+pollster = "0.2"
+env_logger = "0.9"
+glam = { version = "0.21.3", features = ["bytemuck"] }
+
+[dependencies.shame]
+features = ["mirror"]
+# git = "https://github.com/bddap/shame.git"
+# rev = "eb8f008fedea75cd46490fb26292f6f0768de12c"
+path = "../shame/shame"
+version = "1.0.1"
