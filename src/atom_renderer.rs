@@ -46,7 +46,7 @@ impl AtomRenderer {
     }
 
     /// write render commands to the command buffer
-    // TODO: consider passing typed buffers into this function
+    // TODO: consider passing a typed buffer into this function
     pub fn render<'a: 'b, 'b>(&'a self, pass: &mut wgpu::RenderPass<'b>) {
         let instance_slice = if let Some(i) = self.instance_buf.slice() {
             i
@@ -68,6 +68,6 @@ impl AtomRenderer {
     }
 
     pub fn need_features() -> wgpu::Features {
-        wgpu::Features::DEPTH_CLIP_CONTROL | wgpu::Features::PUSH_CONSTANTS
+        wgpu::Features::DEPTH_CLIP_CONTROL
     }
 }

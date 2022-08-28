@@ -22,7 +22,7 @@ glam = { version = "0.21.3", features = ["bytemuck"] }
 
 [dependencies.shame]
 features = ["mirror"]
-# git = "https://github.com/bddap/shame.git"
-# rev = "eb8f008fedea75cd46490fb26292f6f0768de12c"
-path = "../shame/shame"
+git = "https://github.com/bddap/shame.git"
+rev = "3f923e3b15b4a04b8d0815f130d84fd9fa242d2e"
+# path = "../shame/shame"
 version = "1.0.1"

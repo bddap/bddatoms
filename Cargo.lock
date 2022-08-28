@@ -1085,6 +1085,7 @@ checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 [[package]]
 name = "shame"
 version = "1.0.1"
+source = "git+https://github.com/bddap/shame.git?rev=3f923e3b15b4a04b8d0815f130d84fd9fa242d2e#3f923e3b15b4a04b8d0815f130d84fd9fa242d2e"
 dependencies = [
  "bytemuck",
  "shame_derive",
@@ -1095,6 +1096,7 @@ dependencies = [
 [[package]]
 name = "shame_derive"
 version = "1.0.1"
+source = "git+https://github.com/bddap/shame.git?rev=3f923e3b15b4a04b8d0815f130d84fd9fa242d2e#3f923e3b15b4a04b8d0815f130d84fd9fa242d2e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1104,6 +1106,7 @@ dependencies = [
 [[package]]
 name = "shame_graph"
 version = "1.0.1"
+source = "git+https://github.com/bddap/shame.git?rev=3f923e3b15b4a04b8d0815f130d84fd9fa242d2e#3f923e3b15b4a04b8d0815f130d84fd9fa242d2e"
 dependencies = [
  "enum_properties",
  "smallvec",

@@ -1,3 +1,4 @@
+use bddatoms::render::Render;
 use bddatoms::render_pipeline::AtomCpu;
 use std::sync::Arc;
 use winit::event::{KeyboardInput, VirtualKeyCode};
@@ -9,7 +10,7 @@ use winit::{
 
 async fn run(event_loop: EventLoop<()>, window: Window) {
     let window = Arc::new(window);
-    let mut render = bddatoms::render::Render::create(Arc::clone(&window)).await;
+    let mut render = Render::create(Arc::clone(&window)).await;
 
     render.atom_renderer_mut().set_atoms(&[
         AtomCpu {
@@ -39,7 +40,7 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
             event: WindowEvent::Resized(size),
             ..
         } => {
-            render.resize(size.width, size.height);
+            render.resize(size);
         }
         Event::RedrawRequested(_) => {
             render.frame();

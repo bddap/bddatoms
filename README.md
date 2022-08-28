@@ -1,3 +1,5 @@
+![Screenshot](./demo/screenshot.png)
+
 ## License
 
 Licensed under either of

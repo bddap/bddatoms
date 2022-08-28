@@ -31,6 +31,9 @@ pub fn pipeline(mut f: RenderFeatures) {
     let uv = poly.lerp(vertex.xy());
 
     let distance_to_center_squared = uv.dot(uv);
+    distance_to_center_squared
+        .gt(&1.0)
+        .then(|| Any::discard_fragment());
     // if distance_to_center_squared > 1f {
     //     discard;
     // }

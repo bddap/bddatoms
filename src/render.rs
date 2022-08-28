@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use winit::window::Window;
+use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::atom_renderer::AtomRenderer;
 
@@ -61,7 +61,7 @@ impl Render {
                 format: swapchain_format,
                 width: size.width,
                 height: size.height,
-                present_mode: wgpu::PresentMode::Mailbox,
+                present_mode: wgpu::PresentMode::Fifo,
             },
         );
 
@@ -119,18 +119,21 @@ impl Render {
         frame.present();
     }
 
-    pub fn resize(&mut self, w: u32, h: u32) {
-        self.surface.configure(
-            &self.device,
-            &wgpu::SurfaceConfiguration {
-                usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                format: self.swapchain_format,
-                width: w,
-                height: h,
-                present_mode: wgpu::PresentMode::Mailbox,
-            },
-        );
-        self.depth_texture = depth_buffer_with_size(w, h, &self.device);
+    pub fn resize(&mut self, PhysicalSize { width, height }: winit::dpi::PhysicalSize<u32>) {
+        debug_assert!(width != 0 && height != 0);
+        if width != 0 && height != 0 {
+            self.surface.configure(
+                &self.device,
+                &wgpu::SurfaceConfiguration {
+                    usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                    format: self.swapchain_format,
+                    width,
+                    height,
+                    present_mode: wgpu::PresentMode::Mailbox,
+                },
+            );
+            self.depth_texture = depth_buffer_with_size(width, height, &self.device);
+        }
     }
 
     pub fn atom_renderer_mut(&mut self) -> &mut AtomRenderer {
