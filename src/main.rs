@@ -24,9 +24,24 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
             radius: 0.3,
         },
         AtomCpu {
-            pos: [-0.4, -0.3, 0.6],
+            pos: [-0.4, -0.3, 0.4],
             color: [0.3, 0.3, 0.1],
             radius: 0.2,
+        },
+        AtomCpu {
+            pos: [-0.37, -0.21, 0.41],
+            color: [0.15, 0.1, 0.05],
+            radius: 0.17,
+        },
+        AtomCpu {
+            pos: [-0.34, -0.27, 0.41 + 0.17],
+            color: [0.1, 0.1, 0.1],
+            radius: 0.03,
+        },
+        AtomCpu {
+            pos: [-0.46, -0.27, 0.41 + 0.17],
+            color: [0.1, 0.1, 0.1],
+            radius: 0.03,
         },
         AtomCpu {
             pos: [0.0, 0.0, -100.0],
