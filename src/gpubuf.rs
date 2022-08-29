@@ -1,64 +1,69 @@
 use core::mem::size_of;
-use std::{marker::PhantomData, ops::DerefMut, sync::Arc};
+use std::{marker::PhantomData, sync::Arc};
+
+use wgpu::{
+    util::{BufferInitDescriptor, DeviceExt},
+    BufferBinding,
+};
 
 /// A *typed* buffer on the gpu
 pub struct GpuBuf<T> {
     inner: wgpu::Buffer,
-    size_octets: usize,
 
     // current number of elements
     length: usize,
+    capacity: usize,
 
-    usage: wgpu::BufferUsages,
     device: Arc<wgpu::Device>,
+    queue: Arc<wgpu::Queue>,
     _spook: PhantomData<*const T>,
 }
 
 impl<T> GpuBuf<T> {
-    pub fn create(
+    /// create and set contents
+    pub fn initialize(
         device: Arc<wgpu::Device>,
-        initial_capacity: usize,
+        queue: Arc<wgpu::Queue>,
+        content: &[T],
         usage: wgpu::BufferUsages,
-    ) -> Self {
-        let size_octets = initial_capacity * size_of::<T>();
+    ) -> Self
+    where
+        T: bytemuck::NoUninit,
+    {
         Self {
-            inner: device.create_buffer(&wgpu::BufferDescriptor {
+            inner: device.create_buffer_init(&BufferInitDescriptor {
                 label: None,
-                size: size_octets as u64,
+                contents: bytemuck::cast_slice(content),
                 usage,
-                mapped_at_creation: true,
             }),
-            size_octets,
-            length: 0,
-            usage,
+            length: content.len(),
+            capacity: content.len(),
             device,
+            queue,
             _spook: PhantomData,
         }
     }
 
-
     // Maps the buffer to to host memory, writes, then unmaps.
     // This is all done synchronously. Perhaps not the fastest solution,
     // but simple.
-    pub fn set_from_slice(&mut self, target: &[T])
+    pub fn copy_from_slice(&mut self, target: &[T])
     where
         T: bytemuck::NoUninit,
     {
-        let target_size = target.len() * size_of::<T>();
-        if self.size_octets < target_size {
-            self.size_octets = target_size;
-            self.inner = self.device.create_buffer(&wgpu::BufferDescriptor {
-                label: None,
-                size: target_size as u64,
-                usage: self.usage,
-                mapped_at_creation: true,
-            });
-        }
-        self.inner.slice(..).get_mapped_range_mut().deref_mut()[0..target_size]
-            .copy_from_slice(bytemuck::cast_slice(target));
-
+        assert!(target.len() <= self.capacity);
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        let as_raw: &[u8] = bytemuck::cast_slice(target);
+        let nu = self.device.create_buffer_init(&BufferInitDescriptor {
+            label: None,
+            contents: as_raw,
+            usage: wgpu::BufferUsages::COPY_SRC,
+        });
         self.length = target.len();
-        self.inner.unmap();
+        encoder.copy_buffer_to_buffer(&nu, 0, &self.inner, 0, as_raw.len() as u64);
+        self.queue.submit([encoder.finish()]);
     }
 
     pub fn len(&self) -> usize {
@@ -76,7 +81,11 @@ impl<T> GpuBuf<T> {
         }
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    pub fn as_entire_buffer_binding(&self) -> BufferBinding {
+        self.inner.as_entire_buffer_binding()
     }
 }

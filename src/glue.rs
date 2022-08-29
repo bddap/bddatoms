@@ -86,9 +86,9 @@ fn make_push_constant_range(shame: &shame::PushConstantInfo) -> wgpu::PushConsta
 fn make_render_pipeline_layout(
     shame: &shame::RenderPipelineInfo,
     device: &wgpu::Device,
-) -> wgpu::PipelineLayout {
+) -> (wgpu::PipelineLayout, Vec<wgpu::BindGroupLayout>) {
     // TODO: i think these layouts should already exist and be passed in here... not sure though
-    let layouts: Vec<_> = shame
+    let layouts: Vec<wgpu::BindGroupLayout> = shame
         .bind_groups
         .iter()
         .map(|x| make_bind_group_layout(x, device))
@@ -96,16 +96,19 @@ fn make_render_pipeline_layout(
 
     let range = shame.push_constant.as_ref().map(make_push_constant_range);
 
-    let bind_group_layouts: Vec<&_> = layouts.iter().collect();
+    let bind_group_layouts: Vec<&wgpu::BindGroupLayout> = layouts.iter().collect();
 
     // Some => &[T], None => &[]
     let slice = range.as_ref().map_or([].as_slice(), std::slice::from_ref);
 
-    device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-        label: None,
-        bind_group_layouts: &bind_group_layouts,
-        push_constant_ranges: slice,
-    })
+    (
+        device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &bind_group_layouts,
+            push_constant_ranges: slice,
+        }),
+        layouts,
+    )
 }
 
 fn make_vertex_format(shame: &shame::tensor_type::Tensor) -> wgpu::VertexFormat {
@@ -413,8 +416,8 @@ pub fn make_render_pipeline(
     shame: &shame::RenderPipelineRecording,
     device: &wgpu::Device,
     surface_format: Option<wgpu::TextureFormat>,
-) -> wgpu::RenderPipeline {
-    let layout = make_render_pipeline_layout(&shame.info, device);
+) -> (wgpu::RenderPipeline, Vec<wgpu::BindGroupLayout>) {
+    let (layout, bind_group_layouts) = make_render_pipeline_layout(&shame.info, device);
 
     let (vsh, fsh) = &shame.shaders_glsl;
 
@@ -442,7 +445,7 @@ pub fn make_render_pipeline(
     let fragment = (!shame.info.color_targets.is_empty())
         .then(|| make_fragment_state(&shame.info, &fsh_module, &mut scratch2, &surface_format));
 
-    device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+    let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: None,
         layout: Some(&layout),
         vertex: make_vertex_state(&shame.info, &vsh_module, &mut scratch0, &mut scratch1),
@@ -451,5 +454,6 @@ pub fn make_render_pipeline(
         multisample: make_multisample_state(&shame.info),
         fragment,
         multiview: None,
-    })
+    });
+    (pipeline, bind_group_layouts)
 }

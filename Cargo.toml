@@ -26,3 +26,5 @@ git = "https://github.com/bddap/shame.git"
 rev = "3f923e3b15b4a04b8d0815f130d84fd9fa242d2e"
 # path = "../shame/shame"
 version = "1.0.1"
+
+[features]

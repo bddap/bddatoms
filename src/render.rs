@@ -1,5 +1,6 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
+use glam::{vec3, Mat4};
 use winit::{dpi::PhysicalSize, window::Window};
 
 use crate::atom_renderer::AtomRenderer;
@@ -12,8 +13,11 @@ pub struct Render {
     _window: Arc<Window>, // window must outlive surface for safety
 
     depth_texture: wgpu::Texture,
-    queue: wgpu::Queue,
+    queue: Arc<wgpu::Queue>,
     swapchain_format: wgpu::TextureFormat,
+
+    // should be part of a separate type as it does't have to to with rendering
+    start: Instant,
 }
 
 impl Render {
@@ -51,6 +55,7 @@ impl Render {
             .await
             .expect("Failed to create device");
         let device = Arc::new(device);
+        let queue = Arc::new(queue);
 
         let swapchain_format = surface.get_preferred_format(&adapter).unwrap();
 
@@ -65,7 +70,8 @@ impl Render {
             },
         );
 
-        let atom_renderer = AtomRenderer::create(Arc::clone(&device), swapchain_format);
+        let atom_renderer =
+            AtomRenderer::create(Arc::clone(&device), Arc::clone(&queue), swapchain_format);
 
         Self {
             depth_texture: depth_buffer_with_size(size.width, size.height, &device),
@@ -75,7 +81,15 @@ impl Render {
             surface,
             queue,
             swapchain_format,
+            start: Instant::now(),
         }
+    }
+
+    pub fn update(&mut self) {
+        self.atom_renderer.set_transform(Mat4::from_axis_angle(
+            vec3(0.0, 1.0, 0.0),
+            (Instant::now().duration_since(self.start).as_secs_f32() / 4.0) % core::f32::consts::TAU,
+        ));
     }
 
     pub fn frame(&self) {
@@ -129,7 +143,7 @@ impl Render {
                     format: self.swapchain_format,
                     width,
                     height,
-                    present_mode: wgpu::PresentMode::Mailbox,
+                    present_mode: wgpu::PresentMode::Fifo,
                 },
             );
             self.depth_texture = depth_buffer_with_size(width, height, &self.device);

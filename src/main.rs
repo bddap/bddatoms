@@ -12,6 +12,10 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
     let window = Arc::new(window);
     let mut render = Render::create(Arc::clone(&window)).await;
 
+    let yellow = [0.3, 0.3, 0.1];
+
+    let brown = [0.15, 0.1, 0.05];
+
     render.atom_renderer_mut().set_atoms(&[
         AtomCpu {
             pos: [0.0; 3],
@@ -20,17 +24,17 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
         },
         AtomCpu {
             pos: [0.3, 0.0, 0.5],
-            color: [0.15, 0.1, 0.05],
+            color: brown,
             radius: 0.3,
         },
         AtomCpu {
             pos: [-0.4, -0.3, 0.4],
-            color: [0.3, 0.3, 0.1],
+            color: yellow,
             radius: 0.2,
         },
         AtomCpu {
             pos: [-0.37, -0.21, 0.41],
-            color: [0.15, 0.1, 0.05],
+            color: [0.1, 0.2, 0.2],
             radius: 0.17,
         },
         AtomCpu {
@@ -44,9 +48,19 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
             radius: 0.03,
         },
         AtomCpu {
-            pos: [0.0, 0.0, -100.0],
+            pos: [-0.37, 0.0, -0.41],
+            color: brown,
+            radius: 0.17,
+        },
+        AtomCpu {
+            pos: [0.0, -1.0, -0.1],
+            color: [0.1, 0.2, 0.1],
+            radius: 0.5,
+        },
+        AtomCpu {
+            pos: [0.0, -0.9, 0.1],
             color: [0.1, 0.1, 0.2],
-            radius: 10.0,
+            radius: 0.5,
         },
     ]);
 
@@ -58,6 +72,7 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
             render.resize(size);
         }
         Event::RedrawRequested(_) => {
+            render.update();
             render.frame();
         }
         Event::RedrawEventsCleared => {
@@ -85,6 +100,8 @@ async fn run(event_loop: EventLoop<()>, window: Window) {
 }
 
 fn main() {
+    env_logger::init();
+
     let event_loop = EventLoop::new();
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(winit::dpi::LogicalSize {
@@ -94,7 +111,6 @@ fn main() {
         .build(&event_loop)
         .unwrap();
 
-    env_logger::init();
     // Temporarily avoid srgb formats for the swapchain on the web
     pollster::block_on(run(event_loop, window));
 }
